@@ -1,6 +1,7 @@
 import requests
 import random
 from pprint import pprint
+import os
 
 def scrap_one_page(page_idx, date_debut, date_fin):
     user_agents = [
@@ -14,7 +15,7 @@ def scrap_one_page(page_idx, date_debut, date_fin):
     headers = {'User-Agent': random.choice(user_agents)}
     params = {
     "city_id": 3117735,
-    "date": f"{date_debut}T00:00:00,{date_fin}T23:59:59",
+    "date": f"{date_debut},{date_fin}",
     "page": page_idx,  # Vous pouvez modifier cette valeur pour naviguer à travers les pages
     "longitude": -3.70256,
     "latitude": 40.4165,
@@ -29,7 +30,7 @@ def scrap_one_page(page_idx, date_debut, date_fin):
         print("Une erreur s'est produite:", e)
     return list(event)
 
-def save_json(response,idx_page,date):
+def save_json(response, idx_page, date):
     folder_path = f"sauvegarde_json_{date}"
     os.makedirs(folder_path, exist_ok=True)
     with open('{folder_path}/response_data_{idx_page}.json', 'w', encoding='utf-8') as json_file:
@@ -37,9 +38,9 @@ def save_json(response,idx_page,date):
 
 def scrap_multiple_pages(start_date, end_date, max_page):
     l_pages = list()
-    response1 = scrap_one_page(start_date, end_date, 1)
-    for i in range(max_page):
-        response2 = scrap_one_page(start_date, end_date, i + 1)
+    response1 = scrap_one_page(1, start_date, end_date)
+    for i in range(2, max_page):
+        response2 = scrap_one_page(i, start_date, end_date)
         if (
             response1.json()["events"] == response2.json()["events"]
             and len(response1.json()["events"]) > 0

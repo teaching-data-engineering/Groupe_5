@@ -28,7 +28,9 @@ for i in range(25):
         break
 pprint(fin)
 
-def save_json(response,idx_page):
-    with open('sauvegarde_json/response_data_{idx_page}.json', 'w', encoding='utf-8') as json_file:
+def save_json(response,idx_page,date):
+    folder_path = f"sauvegarde_json_{date}"
+    os.makedirs(folder_path, exist_ok=True)
+    with open('{folder_path}/response_data_{idx_page}.json', 'w', encoding='utf-8') as json_file:
             json.dump(response, json_file)
         

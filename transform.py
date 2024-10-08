@@ -12,16 +12,21 @@ df = pd.read_csv('df_event.csv')
 
 ##### ajout des coord
 
-def adress_to_coords(adresse):
-    location = geolocator.geocode(adresse)
-    if location:
-        return location.latitude, location.longitude
-    else:
+def adress_to_coords(adresse, geolocator):
+    try:
+        location = geolocator.geocode(adresse)
+        if location:
+            return location.latitude, location.longitude
+        else:
+            print(f"Aucune localisation trouvée pour l'adresse: {adresse}")  # Message pour adresse non trouvée
+            return None, None
+    except Exception as e:
+        print(f"Erreur lors de la géocodification de l'adresse '{adresse}': {e}. Ignorer cette adresse.")
         return None, None
 
 for adresse in df.lieu:
     geolocator = Nominatim(user_agent=f"mon_geocode{random.randint(200000, 300000)}") #changer la grille à chaque lancement
-    latitude, longitude = adress_to_coords(adresse)
+    latitude, longitude = adress_to_coords(adresse,geolocator)
     df.loc[df['lieu'] == adresse, ['latitude', 'longitude']] = [latitude, longitude]
 
 ##### ajout du weekend

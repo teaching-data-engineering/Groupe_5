@@ -76,4 +76,7 @@ def scrap_multiple_pages(start_date, end_date, max_page):
     return l_pages
 
 
-scrap_multiple_pages("2024-10-07T00:00:00", "2024-10-31T00:00:00", 50)
+# scrap_multiple_pages("2024-10-07T00:00:00", "2024-10-31T00:00:00", 50)
+
+def collect_events(max_pages):
+    return scrap_multiple_pages("2024-10-07T00:00:00", "2024-10-31T23:59:59", max_pages)

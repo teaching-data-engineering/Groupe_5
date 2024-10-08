@@ -4,7 +4,7 @@ from pprint import pprint
 import os
 import json
 import time
-
+import pandas as pd
 
 def scrap_one_page(page_idx, date_debut, date_fin):
     user_agents = [
@@ -86,7 +86,7 @@ def scrap_multiple_pages(start_date, end_date, max_page, nb_pages=1):
 
 def extraction(start_date, end_date, max_page):
     l_pages, fin, nb_pages = scrap_multiple_pages(start_date, end_date, max_page)
-    if fin == False:
+    while fin == False:
         start_date = l_pages[-1]["startsAt"]
         l_pages.extend(
             scrap_multiple_pages(
@@ -99,4 +99,31 @@ def extraction(start_date, end_date, max_page):
     return l_pages
 
 
-extraction("2024-10-07T00:00:00", "2024-12-31T00:00:00", 5)
+def json_to_df(lst_dico):
+    df= pd.DataFrame(lst_dico)
+    df= df.rename({"artistImageSrc": 'img_artiste',
+    'properlySizedImageURL': 'url_img_taille_adaptee',
+    'callToActionRedirectUrl': 'url_redir',
+    'fallbackImageUrl' : 'url_img_secours',
+    "artistName" : "artiste" ,
+    "venueName" : "lieu",
+    "streamingEvent" : "even_streaming",
+    "title" : 'titre',
+    "locationText" : 'loc',
+    "pinIconSrc" : 'icone_epingle',
+    "eventUrl" : 'url_even',
+    "artistUrl" : 'url_artiste',
+    "watchLiveText" : 'txt_watch_live',
+    "isPlus" : 'est_plus',
+    "callToActionText" : 'txt_redir',
+    'rsvpCount' : 'RSVP',
+    "rsvpCountInt" : 'RSVP_int',
+    "startsAt" : 'horaire',
+    "timezone" : 'fuseau',
+    "displayRule" : 'regle_affichage' })
+    return df
+
+lst_dico = extraction("2024-10-07T00:00:00", "2024-12-31T00:00:00", 100)
+df = json_to_df(lst_dico)
+df.to_csv('df_event.csv',index='False')
+

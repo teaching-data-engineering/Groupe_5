@@ -10,6 +10,6 @@ def adress_to_coords(adresse):
 
 
 for adresse in df.lieu:
-    geolocator = Nominatim(user_agent=f"mon_geocode{random.randint(10000, 100000)}")
+    geolocator = Nominatim(user_agent=f"mon_geocode{random.randint(100000, 200000)}")
     latitude, longitude = adress_to_coords(adresse)
     df.loc[df['lieu'] == adresse, ['latitude', 'longitude']] = [latitude, longitude]

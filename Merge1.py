@@ -37,7 +37,7 @@ def scrap_one_page(page_idx, date_debut, date_fin):
 
 
 def save_json(response, idx_page, date):
-    folder_path = f"sauvegarde_json_{date.split('T')[0]}"
+    folder_path = f"sauvegarde_json_{date.replace(':', '-')}"
     os.makedirs(folder_path, exist_ok=True)
     with open(
         f"{folder_path}/response_data_{idx_page}.json", "w", encoding="utf-8"

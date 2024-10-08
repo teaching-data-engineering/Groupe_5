@@ -4,7 +4,7 @@ from pprint import pprint
 import os
 import json
 import time
-
+import pandas as pd
 
 def scrap_one_page(page_idx, date_debut, date_fin):
     user_agents = [
@@ -38,28 +38,35 @@ def scrap_one_page(page_idx, date_debut, date_fin):
 
 def save_json(response, idx_page, date):
     folder_path = f"sauvegarde_json_{date.split('T')[0]}"
-    os.makedirs(folder_path, exist_ok=True)
-    with open(
-        f"{folder_path}/response_data_{idx_page}.json", "w", encoding="utf-8"
-    ) as json_file:
-        json.dump(response, json_file)
+    if not os.path.exists(f"{folder_path}/response_data_{idx_page}.json"):
+        os.makedirs(folder_path, exist_ok=True)
+        with open(
+            f"{folder_path}/response_data_{idx_page}.json", "w", encoding="utf-8"
+        ) as json_file:
+            json.dump(response, json_file)
 
 
-def scrap_multiple_pages(start_date, end_date, max_page):
+def scrap_multiple_pages(start_date, end_date, max_page, nb_pages=1):
+    fin = False
     l_pages = list()
     response1 = scrap_one_page(1, start_date, end_date)
 
     if response1:  # Vérifie que la première réponse n'est pas vide
         save_json(
-            response1, 1, response1[-1]["startsAt"]
+            response1, nb_pages, response1[-1]["startsAt"]
         )  # Sauvegarde la première page
         l_pages.extend(response1)  # Ajoute la première page à la liste des résultats
 
-    for i in range(2, max_page):
+    for i in range(2, max_page + 1):
         if len(response1) != 0:
-            time.sleep(1)
+            k=random.uniform(1,3)
+            time.sleep(k)
             response2 = scrap_one_page(i, start_date, end_date)
             print(response1 == response2)
+            if not response2:
+                print(f"Arrêté à la page {nb_pages} car la page est vide.")
+                fin = True
+                break
             if (
                 set(event["startsAt"] for event in response1)
                 == set(event["startsAt"] for event in response2)
@@ -68,15 +75,55 @@ def scrap_multiple_pages(start_date, end_date, max_page):
                 and set(event["venueName"] for event in response1)
                 == set(event["venueName"] for event in response2)
             ):
-                print(f"Arrêté à la page {i} car les pages sont identiques ou vides.")
+                print(f"Arrêté à la page {nb_pages} car les pages sont identiques.")
                 break
-            save_json(response2, i, response2[-1]["startsAt"])
+            save_json(response2, nb_pages + 1, response2[-1]["startsAt"])
             l_pages.extend(response2)
             response1 = response2
+            nb_pages += 1
+    print("Nombre maximal de pages atteint")
+    return l_pages, fin, nb_pages
+
+
+def extraction(start_date, end_date, max_page):
+    l_pages, fin, nb_pages = scrap_multiple_pages(start_date, end_date, max_page)
+    while fin == False:
+        start_date = l_pages[-1]["startsAt"]
+        l_int, fin, nb_pages = scrap_multiple_pages(
+                start_date,
+                end_date,
+                (max_page - nb_pages),
+                nb_pages=nb_pages + 1,
+            )
+        l_pages.extend(l_int)
     return l_pages
 
 
-# scrap_multiple_pages("2024-10-07T00:00:00", "2024-10-31T00:00:00", 50)
+def json_to_df(lst_dico):
+    df= pd.DataFrame(lst_dico)
+    df= df.rename({"artistImageSrc": 'img_artiste',
+    'properlySizedImageURL': 'url_img_taille_adaptee',
+    'callToActionRedirectUrl': 'url_redir',
+    'fallbackImageUrl' : 'url_img_secours',
+    "artistName" : "artiste" ,
+    "venueName" : "lieu",
+    "streamingEvent" : "even_streaming",
+    "title" : 'titre',
+    "locationText" : 'loc',
+    "pinIconSrc" : 'icone_epingle',
+    "eventUrl" : 'url_even',
+    "artistUrl" : 'url_artiste',
+    "watchLiveText" : 'txt_watch_live',
+    "isPlus" : 'est_plus',
+    "callToActionText" : 'txt_redir',
+    'rsvpCount' : 'RSVP',
+    "rsvpCountInt" : 'RSVP_int',
+    "startsAt" : 'horaire',
+    "timezone" : 'fuseau',
+    "displayRule" : 'regle_affichage' })
+    return df
 
-def collect_events(max_pages):
-    return scrap_multiple_pages("2024-10-07T00:00:00", "2024-10-31T23:59:59", max_pages)
+lst_dico = extraction("2024-10-07T00:00:00", "2024-12-31T00:00:00", 100)
+df = json_to_df(lst_dico)
+df.to_csv('df_event.csv',index='False')
+

@@ -48,20 +48,31 @@ def save_json(response, idx_page, date):
 def scrap_multiple_pages(start_date, end_date, max_page):
     l_pages = list()
     response1 = scrap_one_page(1, start_date, end_date)
-    print(response1)
+
+    if response1:  # Vérifie que la première réponse n'est pas vide
+        save_json(
+            response1, 1, response1[-1]["startsAt"]
+        )  # Sauvegarde la première page
+        l_pages.extend(response1)  # Ajoute la première page à la liste des résultats
+
     for i in range(2, max_page):
-        time.sleep(1)
-        response2 = scrap_one_page(i, start_date, end_date)
-        print(response1 == response2)
-        if response1 == response2 or len(response2) == 0:
-            print("stop")
-            break
-            # date = response2[-1]["StartsAt"]
-            # start_date = date
-        print(response1)
-        save_json(response1, i - 1, response1[-1]["startsAt"])
-        l_pages.extend(response1)
-        response1 = response2
+        if len(response1) != 0:
+            time.sleep(1)
+            response2 = scrap_one_page(i, start_date, end_date)
+            print(response1 == response2)
+            if (
+                set(event["startsAt"] for event in response1)
+                == set(event["startsAt"] for event in response2)
+                and set(event["artistName"] for event in response1)
+                == set(event["artistName"] for event in response2)
+                and set(event["venueName"] for event in response1)
+                == set(event["venueName"] for event in response2)
+            ):
+                print(f"Arrêté à la page {i} car les pages sont identiques ou vides.")
+                break
+            save_json(response2, i, response2[-1]["startsAt"])
+            l_pages.extend(response2)
+            response1 = response2
     return l_pages
 
 

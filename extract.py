@@ -20,7 +20,7 @@ def scrap_one_page(page_idx, date_debut, date_fin):
     params = {
         "city_id": 5506956,
         "date": f"{date_debut},{date_fin}",
-        "page": page_idx,  # Vous pouvez modifier cette valeur pour naviguer à travers les pages
+        "page": page_idx,  
         "longitude": -115.13722,
         "latitude": 36.17497,
         "genre_query": "all-genres",
@@ -28,7 +28,7 @@ def scrap_one_page(page_idx, date_debut, date_fin):
 
     try:
         response = requests.get(url, params=params, headers=headers)
-        response.raise_for_status()  # Vérifie les erreurs HTTP
+        response.raise_for_status() 
         event = response.json()["events"]
         # data.append(response.json())
     except requests.exceptions.RequestException as e:
@@ -51,11 +51,11 @@ def scrap_multiple_pages(start_date, end_date, max_page, nb_pages=1):
     l_pages = list()
     response1 = scrap_one_page(1, start_date, end_date)
 
-    if response1:  # Vérifie que la première réponse n'est pas vide
+    if response1:  
         save_json(
             response1, nb_pages, response1[-1]["startsAt"]
-        )  # Sauvegarde la première page
-        l_pages.extend(response1)  # Ajoute la première page à la liste des résultats
+        ) 
+        l_pages.extend(response1)  
 
     for i in range(2, max_page + 1):
         if len(response1) != 0:
@@ -81,7 +81,6 @@ def scrap_multiple_pages(start_date, end_date, max_page, nb_pages=1):
             l_pages.extend(response2)
             response1 = response2
             nb_pages += 1
-    print("Nombre maximal de pages atteint")
     return l_pages, fin, nb_pages
 
 
@@ -101,29 +100,10 @@ def extraction(start_date, end_date, max_page):
 
 def json_to_df(lst_dico):
     df= pd.DataFrame(lst_dico)
-    df= df.rename({"artistImageSrc": 'img_artiste',
-    'properlySizedImageURL': 'url_img_taille_adaptee',
-    'callToActionRedirectUrl': 'url_redir',
-    'fallbackImageUrl' : 'url_img_secours',
-    "artistName" : "artiste" ,
-    "venueName" : "lieu",
-    "streamingEvent" : "even_streaming",
-    "title" : 'titre',
-    "locationText" : 'loc',
-    "pinIconSrc" : 'icone_epingle',
-    "eventUrl" : 'url_even',
-    "artistUrl" : 'url_artiste',
-    "watchLiveText" : 'txt_watch_live',
-    "isPlus" : 'est_plus',
-    "callToActionText" : 'txt_redir',
-    'rsvpCount' : 'RSVP',
-    "rsvpCountInt" : 'RSVP_int',
-    "startsAt" : 'horaire',
-    "timezone" : 'fuseau',
-    "displayRule" : 'regle_affichage' })
+    df.columns=['img_artiste','url_img_taille_adaptee','url_redir','url_img_secours','artiste','lieu','even_streaming','titre','loc','icone_epingle','url_even','url_artiste','txt_watch_live','est_plus','txt_redir','RSVP','RSVP_int','horaire_debut','horaire_fin','fuseau','regle_affichage','locale']
     return df
 
-lst_dico = extraction("2024-10-07T00:00:00", "2024-12-31T00:00:00", 100)
+lst_dico = extraction("2024-10-07T00:00:00", "2024-10-31T00:00:00", 50)
 df = json_to_df(lst_dico)
 df.to_csv('df_event.csv',index='False')
 

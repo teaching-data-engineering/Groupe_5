@@ -8,9 +8,10 @@ import json
 import time
 import pandas as pd
 
-df = pd.read_csv('df_event.csv')
+df = pd.read_csv('df_event_base.csv')
 
 ##### ajout des coord
+
 
 def adress_to_coords(adresse, geolocator):
     try:
@@ -18,16 +19,23 @@ def adress_to_coords(adresse, geolocator):
         if location:
             return location.latitude, location.longitude
         else:
-            print(f"Aucune localisation trouvée pour l'adresse: {adresse}")  # Message pour adresse non trouvée
+            print(f"Aucune localisation trouvée pour l'adresse: {adresse}") 
             return None, None
     except Exception as e:
         print(f"Erreur lors de la géocodification de l'adresse '{adresse}': {e}. Ignorer cette adresse.")
         return None, None
 
-for adresse in df.lieu:
-    geolocator = Nominatim(user_agent=f"mon_geocode{random.randint(200000, 300000)}") #changer la grille à chaque lancement
-    latitude, longitude = adress_to_coords(adresse,geolocator)
-    df.loc[df['lieu'] == adresse, ['latitude', 'longitude']] = [latitude, longitude]
+geolocator = Nominatim(user_agent=f"mon_geocode{random.randint(200000, 300000)}")
+
+adresses_uniques = df['lieu'].unique()
+
+coords_dict = {}
+for adresse in adresses_uniques:
+    latitude, longitude = adress_to_coords(adresse, geolocator)
+    coords_dict[adresse] = {'latitude': latitude, 'longitude': longitude}
+
+for adresse, coords in coords_dict.items():
+    df.loc[df['lieu'] == adresse, ['latitude', 'longitude']] = [coords['latitude'], coords['longitude']]
 
 ##### ajout du weekend
 
@@ -51,20 +59,19 @@ def get_artist_area(artist_name):
         if 'artists' in data and len(data['artists']) > 0:
             first_artist = data['artists'][0]
             if 'area' in first_artist:
-                print(first_artist)
                 return first_artist['area']['name'] 
             else:
                 return None
         else:
             return None
     else:
-        return f"Erreur {response.status_code}"
+        return None
 
-def get_provenance(artiste):
-    area = get_artist_area(artiste)
-    time.sleep(1)  
-    return area
+provenances_dict = {}
 
-df['artiste_provenance'] = df['artiste'].apply(get_provenance)
+for artiste in df['artiste'].unique():
+    provenance = get_artist_area(artiste)
+    provenances_dict[artiste] = provenance
+df['artiste_provenance'] = df['artiste'].map(provenances_dict)
 
-df.to_csv('df_event.csv',type='w',index='False')
+df.to_csv('df_event.csv',index='False')

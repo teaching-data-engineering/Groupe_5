@@ -105,5 +105,5 @@ def json_to_df(lst_dico):
 
 lst_dico = extraction("2024-10-07T00:00:00", "2024-10-31T00:00:00", 50)
 df = json_to_df(lst_dico)
-df.to_csv('df_event.csv',index='False')
+df.to_csv('df_event_base.csv',index='False')
 

@@ -38,11 +38,12 @@ def scrap_one_page(page_idx, date_debut, date_fin):
 
 def save_json(response, idx_page, date):
     folder_path = f"sauvegarde_json_{date.split('T')[0]}"
-    os.makedirs(folder_path, exist_ok=True)
-    with open(
-        f"{folder_path}/response_data_{idx_page}.json", "w", encoding="utf-8"
-    ) as json_file:
-        json.dump(response, json_file)
+    if not os.path.exists(f"{folder_path}/response_data_{idx_page}.json"):
+        os.makedirs(folder_path, exist_ok=True)
+        with open(
+            f"{folder_path}/response_data_{idx_page}.json", "w", encoding="utf-8"
+        ) as json_file:
+            json.dump(response, json_file)
 
 
 def scrap_multiple_pages(start_date, end_date, max_page, nb_pages=1):
@@ -79,7 +80,7 @@ def scrap_multiple_pages(start_date, end_date, max_page, nb_pages=1):
             l_pages.extend(response2)
             response1 = response2
             nb_pages += 1
-        print("Nombre maximal de pages atteint")
+    print("Nombre maximal de pages atteint")
     return l_pages, fin, nb_pages
 
 
@@ -98,4 +99,4 @@ def extraction(start_date, end_date, max_page):
     return l_pages
 
 
-extraction("2024-10-07T00:00:00", "2024-12-31T00:00:00", 50)
+extraction("2024-10-07T00:00:00", "2024-12-31T00:00:00", 5)

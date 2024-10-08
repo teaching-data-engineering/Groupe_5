@@ -56,4 +56,4 @@ def json_to_df(lst_dico):
     "startsAt" : 'horaire',
     "timezone" : 'fuseau',
     "displayRule" : 'regle_affichage' })
-    return
+    return df

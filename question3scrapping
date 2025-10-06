@@ -70,7 +70,7 @@ while True:
     page += 1
 
 # Écriture dans un fichier JSON
-with open("october_events.json", "w", encoding="utf-8") as f:
+with open("data_json/october_events.json", "w", encoding="utf-8") as f:
     json.dump(events_dict, f, ensure_ascii=False, indent=2)
 
 print(f"{len(events_dict)} événements enregistrés dans 'october_events.json'.")

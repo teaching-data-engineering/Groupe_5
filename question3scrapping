@@ -1,0 +1,76 @@
+import requests
+import json
+from datetime import datetime
+
+latitude = 36.17497
+longitude = -115.13722
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/115.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "X-Requested-With": "XMLHttpRequest",
+}
+
+seen_artists = set()
+page = 1
+events_dict = {}  # Dictionnaire final pour le JSON
+event_counter = 1  # Clé pour chaque événement
+
+while True:
+    url = "https://www.bandsintown.com/all-dates/fetch-next/upcomingEvents"
+    params = {
+        "came_from": 257,
+        "page": page,
+        "latitude": latitude,
+        "longitude": longitude
+    }
+
+    response = requests.get(url, params=params, headers=headers)
+
+    if response.status_code != 200:
+        print(f"Erreur page {page} :", response.status_code)
+        break
+
+    data = response.json()
+    events = data.get("events", [])
+
+    if not events:
+        break
+
+    current_artists = set(event.get("artistName") for event in events)
+    if current_artists.issubset(seen_artists):
+        break  # Tous doublons → fin de la boucle
+
+    for event in events:
+        artist = event.get("artistName")
+        date_str = event.get("startsAt")
+        date_obj = datetime.fromisoformat(date_str)
+
+        # Filtrer pour octobre
+        if date_obj.month == 10:
+            events_dict[event_counter] = {
+                "artistName": event.get("artistName"),
+                "venueName": event.get("venueName"),
+                "streamingEvent": event.get("streamingEvent"),
+                "locationText": event.get("locationText"),
+                "watchLiveText": event.get("watchLiveText"),
+                "callToActionText": event.get("callToActionText"),
+                "rsvpCount": event.get("rsvpCount"),
+                "rsvpCountInt": event.get("rsvpCountInt"),
+                "startsAt": event.get("startsAt"),
+                "timezone": event.get("timezone"),
+                "displayRule": event.get("displayRule"),
+                "locale": event.get("locale")
+            }
+            event_counter += 1
+
+        seen_artists.add(artist)
+
+    page += 1
+
+# Écriture dans un fichier JSON
+with open("data_json/october_events.json", "w", encoding="utf-8") as f:
+    json.dump(events_dict, f, ensure_ascii=False, indent=2)
+
+print(f"{len(events_dict)} événements enregistrés dans 'october_events.json'.")

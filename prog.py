@@ -1,6 +1,7 @@
 import requests
 import json
 from datetime import datetime
+import pandas as pd
 
 latitude = 36.17497
 longitude = -115.13722

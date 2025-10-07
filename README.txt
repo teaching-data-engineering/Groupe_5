@@ -1,8 +1,3 @@
-SALUT LA TEAM
+Projet de groupe d’étudiants en Master 2 MAS, réalisé en octobre/novembre 2025. 
 
-msg de jululu
-
-msg de Solo 
-
-test 
-
+Travail effectué par Juliette Brault, Florent Cheyron, Mathis Cotonnec, Damien Peres, Solo Peyret 

@@ -26,8 +26,10 @@ FIELDS = [
 def get_headers():
     return {
         "User-Agent": random.choice(USER_AGENTS),
-        "Accept": "application/json",
-        "X-Requested-With": "XMLHttpRequest"
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "X-Requested-With": "XMLHttpRequest",
+        "Referer": "https://www.bandsintown.com/",
+        "Origin": "https://www.bandsintown.com"
     }
 
 

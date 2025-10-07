@@ -19,5 +19,5 @@ def json_to_dataframe(json_file):
     
     return df
 
-df_events = json_to_dataframe("data_json/october_events.json")
+df_events = json_to_dataframe("october_events.json")
 print(df_events.head())

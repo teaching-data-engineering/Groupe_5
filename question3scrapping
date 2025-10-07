@@ -48,7 +48,7 @@ while True:
         date_obj = datetime.fromisoformat(date_str)
 
         # Filtrer pour octobre
-        if date_obj.month == 10:
+        if date_obj.month == 12:
             events_dict[event_counter] = {
                 "artistName": event.get("artistName"),
                 "venueName": event.get("venueName"),
@@ -70,7 +70,7 @@ while True:
     page += 1
 
 # Écriture dans un fichier JSON
-with open("data_json/october_events.json", "w", encoding="utf-8") as f:
+with open("october_events.json", "w", encoding="utf-8") as f:
     json.dump(events_dict, f, ensure_ascii=False, indent=2)
 
 print(f"{len(events_dict)} événements enregistrés dans 'october_events.json'.")

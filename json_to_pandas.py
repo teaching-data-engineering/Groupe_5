@@ -8,7 +8,7 @@ def load_all_events(data_dir="data_json"):
     all_events = []
     
     for json_file in sorted(path.glob("*.json")):
-        with open(json_file, encoding="utf-8") as f:
+        with open(json_file, encoding="utf-8-sig") as f:
             data = json.load(f)
             all_events.extend(data.values())
     

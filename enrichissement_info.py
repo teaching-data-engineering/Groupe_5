@@ -8,7 +8,7 @@ from tqdm import tqdm
 import re
 
 df = load_all_events()
-df = df.head()
+df = df.iloc[1100:]
 
 headers = {
     "User-Agent": "Mozilla/5.0" 
@@ -33,7 +33,7 @@ def extract_genres(soup):
 
 
 def get_artist_info(artist_url):
-    response = requests.get(artist_url, headers={"User-Agent": "Mozilla/5.0"})
+    response = requests.get(artist_url, headers= headers)
     soup = BeautifulSoup(response.text, "html.parser")
 
     # Hometown
@@ -71,5 +71,5 @@ json_output = df_new.to_json(orient="records", indent=4)
 print(json_output.replace("\\/", "/"))
 
 # Optionnel : sauvegarde dans un fichier
-with open("events_enriched.json", "w", encoding="utf-8") as f:
+with open("data_info/events_enriched23.json", "w", encoding="utf-8") as f:
     f.write(json_output.replace("\\/", "/"))

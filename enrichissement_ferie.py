@@ -5,16 +5,13 @@ import requests
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-# ======================================================
-# 1️⃣ Charger les événements depuis le fichier enrichi
-# ======================================================
+
 def json_to_dataframe(json_file):
     """Charge un fichier JSON (liste d'événements) en DataFrame pandas."""
     with open(json_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     df = pd.DataFrame(data)
     
-    # Extraire la date et l'heure à partir de la colonne startsAt
     if "startsAt" in df.columns:
         df["date"] = pd.to_datetime(df["startsAt"], errors="coerce").dt.date
         df["hour"] = pd.to_datetime(df["startsAt"], errors="coerce").dt.time
@@ -22,16 +19,13 @@ def json_to_dataframe(json_file):
     return df
 
 
-# Déterminer le chemin absolu du fichier JSON (même dossier que le script)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(BASE_DIR, "enrichissement_info_artiste.json")
 
 df_events = json_to_dataframe(file_path)
 
 
-# ======================================================
-# 2️⃣ Récupérer les jours fériés US via Calendarific
-# ======================================================
+# Récupérer les jours fériés US via Calendarific
 API_KEY = "tODcUQCbwj11dE8rmXOK0ih5kVaGf5jB"  # ← remplace par ta vraie clé
 COUNTRY = "US"
 YEAR = datetime.now().year
@@ -55,7 +49,7 @@ for h in holidays_iterable:
             "locations": h.get("locations", "")
         })
     except Exception as e:
-        print("⚠️ Erreur dans un élément :", e, h)
+        print("Erreur dans un élément :", e, h)
 
 df_holidays = pd.DataFrame(holidays)
 if not df_holidays.empty:
@@ -66,12 +60,12 @@ if not df_holidays.empty:
         df_holidays["type"].str.contains("National holiday", case=False, na=False)
     ]
 else:
-    print("⚠️ Aucun jour férié trouvé.")
+    print("Aucun jour férié trouvé.")
 
 
-# ======================================================
-# 3️⃣ Définir les vacances scolaires (Las Vegas, CCSD)
-# ======================================================
+
+## les vacances scolaires
+
 school_holidays = [
     ("2024-12-23", "2025-01-03"),  # Vacances d'hiver
     ("2025-03-17", "2025-03-21"),  # Vacances de printemps
@@ -87,17 +81,15 @@ def is_in_school_holiday(date):
     return False
 
 
-# ======================================================
-# 4️⃣ Ajouter les colonnes pour jours fériés et vacances scolaires
-# ======================================================
+#jours fériés et vacances scolaires
+
 df_events["date"] = pd.to_datetime(df_events["date"], errors="coerce").dt.date
 df_events["is_holiday"] = df_events["date"].isin(df_holidays["date"]) if not df_holidays.empty else False
 df_events["is_school_holiday"] = df_events["date"].apply(is_in_school_holiday)
 
 
-# ======================================================
-# 5️⃣ Ajouter la colonne "day_before_holiday"
-# ======================================================
+# colonne "day_before_holiday"
+
 holiday_dates = set(df_holidays["date"])
 df_events["day_before_holiday"] = df_events["date"].apply(lambda d: (d + pd.Timedelta(days=1)) in holiday_dates)
 
@@ -105,12 +97,10 @@ df_events["day_before_holiday"] = df_events["date"].apply(lambda d: (d + pd.Time
 #Ajoute colonne "events_same_day"
 
 
-# Compter le nombre d'événements par date
 events_per_day = df_events["date"].value_counts()
-# Ajouter cette information dans le DataFrame
 df_events["events_same_day"] = df_events["date"].map(events_per_day)
 
 
 output_file = os.path.join(BASE_DIR, "events_enrichis.json")
 df_events.to_json(output_file, orient="records", indent=2, force_ascii=False)
-print(f"✅ Fichier enrichi sauvegardé : {output_file}")
+print(f"Fichier enrichi sauvegardé : {output_file}")

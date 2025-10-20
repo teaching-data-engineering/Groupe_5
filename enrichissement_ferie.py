@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 
 
 def json_to_dataframe(json_file):
-    """Charge un fichier JSON (liste d'événements) en DataFrame pandas."""
     with open(json_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     df = pd.DataFrame(data)
@@ -26,7 +25,7 @@ df_events = json_to_dataframe(file_path)
 
 
 # Récupérer les jours fériés US via Calendarific
-API_KEY = "tODcUQCbwj11dE8rmXOK0ih5kVaGf5jB"  # ← remplace par ta vraie clé
+API_KEY = "tODcUQCbwj11dE8rmXOK0ih5kVaGf5jB"
 COUNTRY = "US"
 YEAR = datetime.now().year
 
@@ -74,7 +73,6 @@ school_holidays = [(pd.to_datetime(start).date(), pd.to_datetime(end).date()) fo
 
 
 def is_in_school_holiday(date):
-    """Renvoie True si la date est dans une période de vacances scolaires."""
     for start, end in school_holidays:
         if start <= date <= end:
             return True

@@ -21,7 +21,7 @@ def load_all_events(data_dir="data_json"):
         except json.JSONDecodeError:
             print(f"⚠️ Erreur JSON dans {json_file.name} — fichier ignoré.")
             continue
-
+        
         all_events.extend(data.values())
 
     return pd.DataFrame(all_events)

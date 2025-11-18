@@ -136,3 +136,37 @@ def search_events(
     base_url = build_url_with_params("/events/search", params)
     
     return exec_query_paginated(sql, page, page_size, base_url)
+
+@app.get("/events/flo")
+def get_events_by_hour(
+    hour: Optional[str] = Query(None, description="Heure spÃ©cifique (ex: 20:00:00)"),
+    risk: Optional[bool] = Query(None, description="Afficher le score moyen de risque"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100)
+):
+    if hour:
+        sql = f"SELECT * FROM `dataset_groupe_5.events` WHERE hour = '{hour}' ORDER BY date DESC"
+        base_url = build_url_with_params("/events/flo", {"hour": hour, "risk": risk})
+    else:
+        if risk:
+            sql = """
+                SELECT 
+                    hour,
+                    COUNT(*) AS event_count,
+                    ROUND(AVG(risk_score), 3) AS avg_risk_score
+                FROM `dataset_groupe_5.events`
+                GROUP BY hour
+                ORDER BY hour
+            """
+        else:
+            sql = """
+                SELECT 
+                    hour,
+                    COUNT(*) AS event_count
+                FROM `dataset_groupe_5.events`
+                GROUP BY hour
+                ORDER BY hour
+            """
+        base_url = build_url_with_params("/events/flo", {"risk": risk})
+    
+    return exec_query_paginated(sql, page, page_size, base_url)

@@ -137,7 +137,7 @@ def search_events(
     
     return exec_query_paginated(sql, page, page_size, base_url)
 
-@app.get("/events/flo")
+@app.get("/events/hour")
 def get_events_by_hour(
     hour: Optional[str] = Query(None, description="Heure spÃ©cifique (ex: 20:00:00)"),
     risk: Optional[bool] = Query(None, description="Afficher le score moyen de risque"),
@@ -146,7 +146,7 @@ def get_events_by_hour(
 ):
     if hour:
         sql = f"SELECT * FROM `dataset_groupe_5.events` WHERE hour = '{hour}' ORDER BY date DESC"
-        base_url = build_url_with_params("/events/flo", {"hour": hour, "risk": risk})
+        base_url = build_url_with_params("/events/hour", {"hour": hour, "risk": risk})
     else:
         if risk:
             sql = """
@@ -167,6 +167,6 @@ def get_events_by_hour(
                 GROUP BY hour
                 ORDER BY hour
             """
-        base_url = build_url_with_params("/events/flo", {"risk": risk})
+        base_url = build_url_with_params("/events/hour", {"risk": risk})
     
     return exec_query_paginated(sql, page, page_size, base_url)

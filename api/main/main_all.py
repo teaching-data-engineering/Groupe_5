@@ -3,6 +3,7 @@ from fastapi import FastAPI, Query
 from pydantic import BaseModel
 from google.cloud import bigquery
 from google.oauth2 import service_account
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 credentials = service_account.Credentials.from_service_account_file("sa-key-group-5.json")
 client = bigquery.Client(credentials=credentials, project=credentials.project_id)
@@ -20,8 +21,6 @@ def exec_query(sql: str):
     return [dict(row) for row in query_job.result()]
 
 def exec_query_paginated(sql: str, page: int, page_size: int, base_url: str):
-    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-    
     count_sql = f"SELECT COUNT(*) as total FROM ({sql})"
     total = exec_query(count_sql)[0]["total"]
     
@@ -52,13 +51,12 @@ def exec_query_paginated(sql: str, page: int, page_size: int, base_url: str):
     }
 
 def build_url_with_params(endpoint: str, params: dict) -> str:
-    from urllib.parse import urlencode
     query_params = urlencode({k: v for k, v in params.items() if v is not None})
     return f"{BASE_URL}{endpoint}" + (f"?{query_params}" if query_params else "")
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"message": "Bienvenue sur notre API permettant de définir les évènements à risque à Las Vegas"}
 
 @app.get("/mon_endpoint/{objet_id}")
 async def read_objet(objet_id: int, q: Union[str, None] = None):
@@ -339,7 +337,6 @@ def get_events_by_followers(
 
 
 @app.get("/events/risk-by-followers")
-#analyse le risque moyen en fonction du nombre de followers, divisé en groupes de taille égale (Quantiles)
 def get_risk_by_quantiles(
     groups: int = Query(5, description="Nombre de groupes"),
     page: int = Query(1, ge=1),
@@ -347,30 +344,117 @@ def get_risk_by_quantiles(
 ):
 
     sql = f"""
-        SELECT 
-            `groups`,
-            MIN(followers) as min_followers,
-            MAX(followers) as max_followers,
-            ROUND(AVG(risk_score), 2) as average_risk,
-            COUNT(*) as nb_events
-    FROM (
-        SELECT 
-            risk_score, 
-            followers,
-            NTILE({groups}) OVER (ORDER BY followers ASC) as `groups`
-        FROM `dataset_groupe_5.events`
-        WHERE followers IS NOT NULL AND risk_score IS NOT NULL
-    )
-    GROUP BY `groups`
-    ORDER BY `groups` ASC
-"""
-    
+        WITH RankedEvents AS (
+            SELECT 
+                followers,
+                rsvpCountInt,
+                risk_score,
+                NTILE({groups}) OVER (ORDER BY followers ASC) AS quantile_rank
+            FROM dataset_groupe_5.events
+            WHERE followers IS NOT NULL
+              AND risk_score IS NOT NULL
+        )
+        SELECT
+            quantile_rank AS sort_order,
+            CONCAT(
+                'Groupe ', CAST(quantile_rank AS STRING),
+                ' (', CAST(MIN(followers) AS STRING), 
+                ' - ', CAST(MAX(followers) AS STRING), ' followers)'
+            ) AS number_of_followers,
+            COUNT(*) AS nb_events_analyzed,
+            ROUND(AVG(rsvpCountInt), 0) AS avg_rsvp_per_event,
+            ROUND(AVG(risk_score), 2) AS avg_risk
+        FROM RankedEvents
+        GROUP BY quantile_rank
+        ORDER BY quantile_rank ASC
+    """
+
     params = {"groups": groups}
     base_url = build_url_with_params("/events/risk-by-followers", params)
 
     return exec_query_paginated(sql, page, page_size, base_url)
 
 
+
 #----------------#
 # Endpoint-Bonus #
 #----------------#
+
+class VenueUpdate(BaseModel):
+    new_venue: str
+
+@app.put("/events/{event_id}/update-venue")
+#met à jour le nom du lieu d'un évènement donné
+def update_event_venue(
+    event_id: str,
+    new_venue: str = Query(..., description="Nouveau nom du lieu")
+):
+    event_id_clean = event_id.replace("'", "''")
+    new_venue_clean = new_venue.replace("'", "''")
+
+    check_sql = f"""
+        SELECT event_id
+        FROM `dataset_groupe_5.events`
+        WHERE event_id = '{event_id_clean}'
+        LIMIT 1
+    """
+    exists = exec_query(check_sql)
+    if not exists:
+        return {"error": f"Event with ID '{event_id}' not found."}
+
+    update_sql = f"""
+        UPDATE `dataset_groupe_5.events`
+        SET venueName = '{new_venue_clean}'
+        WHERE event_id = '{event_id_clean}'
+    """
+    client.query(update_sql).result()
+
+    updated_sql = f"""
+        SELECT *
+        FROM `dataset_groupe_5.events`
+        WHERE event_id = '{event_id_clean}'
+    """
+    updated = exec_query(updated_sql) #ici on utilise exec_query non paginated car on sait qu'on n'a qu'un seul résultat
+
+    return {
+        "message": "Venue updated successfully",
+        "event": updated[0]
+    }
+
+
+@app.put("/events/{event_id}/update-artist")
+def update_event_artist(
+    event_id: str,
+    new_artist: str = Query(..., description="Nouveau nom de l'artiste")
+):
+    event_id_clean = event_id.replace("'", "''")
+    new_artist_clean = new_artist.replace("'", "''")
+
+    check_sql = f"""
+        SELECT event_id
+        FROM `dataset_groupe_5.events`
+        WHERE event_id = '{event_id_clean}'
+        LIMIT 1
+    """
+    exists = exec_query(check_sql)
+    if not exists:
+        return {"error": f"Event with ID '{event_id}' not found."}
+
+    update_sql = f"""
+        UPDATE `dataset_groupe_5.events`
+        SET artistName = '{new_artist_clean}'
+        WHERE event_id = '{event_id_clean}'
+    """
+    client.query(update_sql).result()
+
+    updated_sql = f"""
+        SELECT *
+        FROM `dataset_groupe_5.events`
+        WHERE event_id = '{event_id_clean}'
+    """
+    updated = exec_query(updated_sql) #ici on utilise exec_query non paginated car on sait qu'on n'a qu'un seul résultat
+
+    return {
+        "message": "Artist updated successfully",
+        "event": updated[0]
+    }

@@ -7,7 +7,7 @@
 Travail effectué par Juliette Brault, Florent Cheyron, Mathis Cotonnec, Damien Peres, Solo Peyret 
 
 Étape à suivre pour obtenir notre travail :
-  1. Exécuter le script de scraping
+  1. Exécuter le script de scraping \n
     Celui-ci récupère les informations nécessaires et génère la base de données initiale.
 
   2. Après avoir réalisé le scraping, nous créons notre DataFrame à partir de json_to_pandas.py

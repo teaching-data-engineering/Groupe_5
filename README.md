@@ -6,7 +6,7 @@
 
 Travail effectué par Juliette Brault, Florent Cheyron, Mathis Cotonnec, Damien Peres, Solo Peyret 
 
-Étape à suivre pour obtenir notre travail :
+Étape à suivre pour obtenir notre travail :  
   1. Exécuter le script de scraping (APIscrapping.py)
     Celui-ci récupère les informations nécessaires et génère la base de données initiale.
 
@@ -20,7 +20,7 @@ Travail effectué par Juliette Brault, Florent Cheyron, Mathis Cotonnec, Damien 
      En plus de cela, nous avons développé un modèle de prévision de type K-plus-proche-voisins, qui calcule un score       de risque à partir de différentes métriques, telles que le nombres de followers, l'emplacement ou encore le style      musical. Le score obtenu varie entre 0 et 1, puis il est transformé en catégories de risque (faible, modéré,           élevé, très élevé) en fonction de sa valeur.
 
   4. Exécuter create_df_security.py
-     Ce scipt calcule le score de risque, l'ajoute au DataFrame et prépare les données pour les étapes suivantes.
+     Ce script calcule le score de risque, l'ajoute au DataFrame et prépare les données pour les étapes suivantes.
 
   5. Lancer upload_to_bigquery.py
      Il importe le DataFrame dans BigQuery afin de pouvoir travailler dessus ensuite.

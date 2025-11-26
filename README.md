@@ -17,8 +17,9 @@
      Ils permettent d'ajouter des données complémentaires, notamment :
        - Hometown, followers, genres
        - Jours fériés, vacances, jours avant les vacances
-       - Les nombre d'évènements le même jour  
-     En plus de cela, nous avons développé un modèle de prévision de type K-plus-proche-voisins, qui calcule un score       de risque à partir de différentes métriques, telles que le nombres de followers,   l'emplacement ou encore le style      musical. Le score obtenu varie entre 0 et 1, puis il est transformé en catégories de risque (faible, modéré,           élevé, très élevé) en fonction de sa valeur.
+       - Les nombre d'évènements le même jour
+         
+     En plus de cela, nous avons développé un modèle de prévision de type K-plus-proche-voisins, qui calcule un score de risque à partir de différentes métriques, telles que le nombres de followers,               l'emplacement ou encore le style musical. Le score obtenu varie entre 0 et 1, puis il est transformé en catégories de risque (faible, modéré,élevé, très élevé) en fonction de sa valeur.
 
   4. **Exécuter create_df_security.py**    
      Ce script calcule le score de risque, l'ajoute au DataFrame et prépare les données pour les étapes suivantes.

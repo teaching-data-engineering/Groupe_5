@@ -4,11 +4,11 @@
   <img src="./images/vegas.png" alt="Las Vegas" width="300">
 </p>
 
-Travail effectué par Juliette Brault, Florent Cheyron, Mathis Cotonnec, Damien Peres, Solo Peyret 
+**Travail effectué par Juliette Brault, Florent Cheyron, Mathis Cotonnec, Damien Peres, Solo Peyret**
 
 Étape à suivre pour obtenir notre travail :  
 
-  1. **Exécuter le script de scraping (APIscrapping.py)**  
+  1. **Exécuter le script de scraping (APIscraping.py)**  
     Celui-ci récupère les informations nécessaires et génère la base de données initiale.
 
   2. Après avoir réalisé le scraping, nous créons notre DataFrame à partir de **json_to_pandas.py**
@@ -18,7 +18,7 @@ Travail effectué par Juliette Brault, Florent Cheyron, Mathis Cotonnec, Damien 
        - Hometown, followers, genres
        - Jours fériés, vacances, jours avant les vacances
        - Les nombre d'évènements le même jour
-     En plus de cela, nous avons développé un modèle de prévision de type K-plus-proche-voisins, qui calcule un score       de risque à partir de différentes métriques, telles que le nombres de followers, l'emplacement ou encore le style      musical. Le score obtenu varie entre 0 et 1, puis il est transformé en catégories de risque (faible, modéré,           élevé, très élevé) en fonction de sa valeur.
+     En plus de cela, nous avons développé un modèle de prévision de type K-plus-proche-voisins, qui calcule un score       de risque à partir de différentes métriques, telles que le nombres de followers,   l'emplacement ou encore le style      musical. Le score obtenu varie entre 0 et 1, puis il est transformé en catégories de risque (faible, modéré,           élevé, très élevé) en fonction de sa valeur.
 
   4. **Exécuter create_df_security.py**    
      Ce script calcule le score de risque, l'ajoute au DataFrame et prépare les données pour les étapes suivantes.
